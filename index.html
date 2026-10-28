@@ -1,0 +1,1075 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>那客提醒：学姐的箱子</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; font-family: "PingFang SC", "Microsoft YaHei", "Helvetica Neue", sans-serif; background: #7FB069; color: #4A3B2A; overflow: hidden; image-rendering: pixelated; }
+  body { background-image: repeating-linear-gradient(0deg, rgba(255,255,255,0.05) 0 4px, transparent 4px 8px), repeating-linear-gradient(90deg, rgba(255,255,255,0.05) 0 4px, transparent 4px 8px); }
+
+  .phone {
+    position: relative; width: 100%; max-width: 430px; height: 100%; margin: 0 auto;
+    background: #F4E4C1; overflow: hidden;
+    box-shadow: 6px 6px 0 rgba(74,59,42,0.35);
+    display: flex; flex-direction: column;
+  }
+  @media (min-width: 480px) { .phone { height: 92vh; margin-top: 4vh; border-radius: 10px; border: 8px solid #6B4A2B; } }
+
+  /* ===== 顶部栏（星露谷暖橙横幅） ===== */
+  .topbar {
+    flex: 0 0 auto; padding: 14px 16px 10px; background: linear-gradient(180deg,#E8A33D,#C97F2B); color: #fff;
+    display: flex; align-items: center; justify-content: space-between;
+    z-index: 5; border-bottom: 4px solid #6B4A2B; text-shadow: 2px 2px 0 rgba(74,59,42,0.55);
+  }
+  .topbar .title { font-weight: 800; font-size: 14px; letter-spacing: 1px; }
+  .topbar .aigc-tag { font-size: 10px; background: rgba(74,59,42,0.35); padding: 2px 8px; border-radius: 2px; border: 2px solid #6B4A2B; }
+
+  .stage { flex: 1; position: relative; overflow: hidden; background: #F4E4C1; }
+  .screen { position: absolute; inset: 0; display: none; flex-direction: column; }
+  .screen.active { display: flex; animation: screenIn 0.5s cubic-bezier(0.22,0.68,0.36,1) both; }
+  @keyframes screenIn { from { opacity: 0; transform: translateY(18px) scale(0.99); } to { opacity: 1; transform: none; } }
+  /* 屏内元素逐层弹入 */
+  .screen.active:not(.intro-screen) > * { animation: childIn 0.45s cubic-bezier(0.22,0.68,0.36,1) both; }
+  .screen.active:not(.intro-screen) > *:nth-child(1) { animation-delay: 0.05s; }
+  .screen.active:not(.intro-screen) > *:nth-child(2) { animation-delay: 0.13s; }
+  .screen.active:not(.intro-screen) > *:nth-child(3) { animation-delay: 0.21s; }
+  .screen.active:not(.intro-screen) > *:nth-child(4) { animation-delay: 0.29s; }
+  .screen.active:not(.intro-screen) > *:nth-child(5) { animation-delay: 0.37s; }
+  .screen.active:not(.intro-screen) > *:nth-child(n+6) { animation-delay: 0.45s; }
+  @keyframes childIn { from { opacity: 0; transform: translateY(12px) scale(0.985); } to { opacity: 1; transform: none; } }
+  /* 内容区内部逐层弹入 */
+  .screen.active .content > * { animation: childIn 0.45s cubic-bezier(0.22,0.68,0.36,1) both; }
+  .screen.active .content > *:nth-child(1) { animation-delay: 0.10s; }
+  .screen.active .content > *:nth-child(2) { animation-delay: 0.18s; }
+  .screen.active .content > *:nth-child(3) { animation-delay: 0.26s; }
+  .screen.active .content > *:nth-child(4) { animation-delay: 0.34s; }
+  .screen.active .content > *:nth-child(5) { animation-delay: 0.42s; }
+  .screen.active .content > *:nth-child(n+6) { animation-delay: 0.50s; }
+  /* 物品卡片逐个弹出 */
+  .screen.active .shelf-items .item-card { animation: childIn 0.4s cubic-bezier(0.22,0.68,0.36,1) both; }
+  .screen.active .shelf-items .item-card:nth-child(1) { animation-delay: 0.20s; }
+  .screen.active .shelf-items .item-card:nth-child(2) { animation-delay: 0.28s; }
+  .screen.active .shelf-items .item-card:nth-child(3) { animation-delay: 0.36s; }
+  .screen.active .shelf-items .item-card:nth-child(4) { animation-delay: 0.44s; }
+  .screen.active .shelf-items .item-card:nth-child(5) { animation-delay: 0.52s; }
+  .screen.active .shelf-items .item-card:nth-child(6) { animation-delay: 0.60s; }
+  /* 想法选项容器浮现 */
+  .thought-choices.show { animation: childIn 0.45s cubic-bezier(0.22,0.68,0.36,1) both; }
+  /* 全局点击按压反馈 */
+  button:active, .choice-btn:active, .item-card:active, .xray .obj:active, .moments-item.su-item:active { transform: scale(0.96); }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+
+  /* ===== 开场故事（治愈星空插画） ===== */
+  .intro-screen { background: linear-gradient(180deg,#A9C7E8 0%,#E2C9D6 48%,#FFD9A0 100%); color: #4A3B2A; padding: 52px 30px; justify-content: center; }
+  .intro-deco { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+  .intro-deco .moon { position: absolute; top: 150px; right: 34px; width: 52px; height: 52px; border-radius: 50%; background: #FFE08A; box-shadow: 0 0 0 10px rgba(255,214,120,0.4), 0 0 0 22px rgba(255,214,120,0.15); animation: floaty 5s ease-in-out infinite; }
+  .intro-deco .star { display: none; }
+  .intro-deco .s1 { top: 96px; left: 26px; width: 7px; height: 7px; animation-delay: 0.3s; }
+  .intro-deco .s2 { top: 170px; right: 66px; width: 5px; height: 5px; animation-delay: 0.8s; }
+  .intro-deco .s3 { bottom: 150px; left: 52px; width: 6px; height: 6px; animation-delay: 1.2s; }
+  .intro-deco .s4 { bottom: 215px; right: 100px; width: 4px; height: 4px; animation-delay: 0.5s; }
+  .intro-deco .s5 { top: 240px; left: 130px; width: 5px; height: 5px; animation-delay: 1.6s; }
+  .intro-deco .cloud { position: absolute; background: rgba(255,255,255,0.6); }
+  .intro-deco .cloud::before, .intro-deco .cloud::after { content: ''; position: absolute; background: inherit; }
+  .intro-deco .cloud::before { left: 12px; top: -12px; width: 26px; height: 12px; }
+  .intro-deco .cloud::after { right: 14px; top: -8px; width: 18px; height: 8px; }
+  .intro-deco .c1 { bottom: 66px; right: 24px; width: 68px; height: 22px; animation: floaty 6s ease-in-out infinite; }
+  .intro-deco .c2 { bottom: 120px; left: 18px; width: 52px; height: 16px; animation: floaty 7s ease-in-out infinite; animation-delay: 0.6s; }
+  @keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+  @keyframes twinkle { 0%,100% { opacity: 0.25; } 50% { opacity: 1; } }
+  .intro-screen .pline { font-size: 16.5px; line-height: 2; margin-bottom: 14px; opacity: 0; transform: translateY(8px); }
+  .intro-screen .pline.on { animation: lineIn 0.85s cubic-bezier(0.22,0.68,0.36,1) forwards; }
+  @keyframes lineIn { from { opacity: 0; transform: translateY(16px); filter: blur(4px); } to { opacity: 1; transform: none; filter: none; } }
+  .intro-screen .pline.hl { color: #A14434; font-weight: 700; text-shadow: 1px 1px 0 rgba(255,255,255,0.55); }
+  .intro-screen .tap { position: absolute; bottom: 52px; right: 26px; font-size: 13px; font-weight: 700; color: #FFF8E7; background: #C97F2B; border: 2px solid #6B4A2B; padding: 8px 14px; opacity: 0; transition: opacity 0.3s; animation: tapPulse 1.6s ease-in-out infinite; box-shadow: 2px 2px 0 rgba(74,59,42,0.35); }
+  @keyframes tapPulse { 0%,100% { transform: translateX(0); } 50% { transform: translateX(-5px); } }
+
+  /* ===== 朋友圈（微信真实样式） ===== */
+  .moments-view { position: absolute; inset: 0; background: #CFE3B5; display: flex; flex-direction: column; opacity: 0; z-index: 29; pointer-events: none; }
+  .moments-view.show { opacity: 1; pointer-events: auto; transition: opacity 0.4s ease; }
+  .moments-view.show .moments-item { animation: listIn 0.5s cubic-bezier(0.22,0.68,0.36,1) both; }
+  .moments-view.show .moments-item:nth-child(1) { animation-delay: 0.05s; }
+  .moments-view.show .moments-item:nth-child(2) { animation-delay: 0.16s; }
+  .moments-view.show .moments-item:nth-child(3) { animation-delay: 0.27s; }
+  .moments-view.show .moments-item:nth-child(4) { animation-delay: 0.38s; }
+  @keyframes listIn { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+  .moments-nav { flex: 0 0 auto; background: #F4E4C1; text-align: center; padding: 13px 0; font-weight: 800; font-size: 16px; color: #6B4A2B; border-bottom: 4px solid #6B4A2B; position: relative; text-shadow: 1px 1px 0 rgba(255,255,255,0.6); }
+  .moments-nav .cam { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); font-size: 16px; }
+  .moments-nav .dots { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); font-size: 14px; letter-spacing: 1px; }
+  .moments-list { flex: 1; overflow-y: auto; padding-top: 2px; }
+  .moments-item { display: flex; padding: 13px 14px; background: #FFF8E7; position: relative; }
+  .moments-item + .moments-item { border-top: 3px solid #D8C79A; }
+  .moments-item .avatar { width: 40px; height: 40px; border-radius: 4px; background: linear-gradient(135deg,#F472B6,#EC4899); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 15px; flex: 0 0 auto; border: 2px solid #6B4A2B; }
+  .moments-item .main { flex: 1; margin-left: 10px; min-width: 0; }
+  .moments-item .nm { color: #5B4A3B; font-size: 14px; font-weight: 700; }
+  .moments-item .su-tag { display: inline-block; background: #5FB257; color: #fff; font-size: 10px; padding: 2px 7px; border-radius: 2px; margin-left: 6px; vertical-align: 1px; font-weight: 700; border: 1.5px solid #3E7A33; }
+  .moments-item .body { font-size: 14px; line-height: 1.65; color: #4A3B2A; margin-top: 4px; }
+  .moments-item .body .hl { color: #C97F2B; font-weight: 700; }
+  .moments-item .pics { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+  .moments-item .pics .pic { width: 88px; height: 88px; border-radius: 2px; overflow: hidden; background: #EDE3C8; border: 2px solid #D8C79A; }
+  .moments-item .pics .pic img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .moments-item .pics .pic.single { width: 132px; height: 132px; }
+  .moments-item .foot { display: flex; align-items: center; gap: 10px; margin-top: 8px; }
+  .moments-item .tm { font-size: 11px; color: #8B7B5A; }
+  .moments-item .ops { margin-left: auto; font-size: 11px; color: #8B7B5A; display: flex; align-items: center; gap: 10px; }
+  .moments-item .like-box { background: #F1E8CE; border: 1.5px solid #D8C79A; border-radius: 3px; padding: 3px 8px; font-size: 11px; color: #5B4A3B; }
+  .moments-item .cmt-box { color: #8B7B5A; font-size: 11px; }
+  .moments-item.su-item { cursor: pointer; transition: background 0.15s; }
+  .moments-item.su-item:active { background: #F1E8CE; }
+  .moments-tip { flex: 0 0 auto; display: flex; align-items: center; justify-content: center; gap: 8px; margin: 10px 12px 14px; background: linear-gradient(180deg,#FF6B6B,#E63946); color: #fff; text-align: center; font-size: 14.5px; font-weight: 800; padding: 12px 16px; border-radius: 4px; border: 3px solid #8A1F2E; box-shadow: 3px 3px 0 rgba(74,59,42,0.35); animation: tapPulse 1.8s ease-in-out infinite; }
+  .moments-tip .tip-icon { font-size: 20px; }
+  .moments-tip::after { content: '👆'; font-size: 15px; }
+
+  /* ===== 聊天界面（星露谷像素版） ===== */
+  .chat { flex: 1; overflow-y: auto; background: #E8E0C8; background-image: repeating-linear-gradient(0deg, rgba(216,199,154,0.35) 0 2px, transparent 2px 8px); padding: 14px 14px 10px; }
+  .chat-head { text-align: center; font-size: 11px; color: #8B7B5A; margin-bottom: 12px; }
+  .msg { display: flex; margin-bottom: 12px; align-items: flex-end; opacity: 0; }
+  .msg.on { animation: msgIn 0.34s cubic-bezier(0.2,0.75,0.3,1.15) forwards; }
+  .msg.me.on { animation: msgInMe 0.34s cubic-bezier(0.2,0.75,0.3,1.15) forwards; }
+  @keyframes msgIn { from { opacity: 0; transform: translateX(-14px) translateY(6px) scale(0.97); } to { opacity: 1; transform: none; } }
+  @keyframes msgInMe { from { opacity: 0; transform: translateX(14px) translateY(6px) scale(0.97); } to { opacity: 1; transform: none; } }
+  .msg .avatar { width: 38px; height: 38px; border-radius: 4px; flex: 0 0 auto; display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:14px; border: 2px solid #6B4A2B; }
+  .msg .wrap { max-width: 70%; margin: 0 8px; }
+  .msg .name { font-size: 10.5px; color: #8B7B5A; margin-bottom: 3px; font-weight: 700; }
+  .msg .bubble { padding: 9px 12px; border-radius: 4px; font-size: 14.5px; line-height: 1.6; position: relative; border: 2px solid #6B4A2B; }
+  .msg.other .bubble { background: #FFF8E7; box-shadow: 2px 2px 0 rgba(107,74,43,0.35); }
+  .msg.me { flex-direction: row-reverse; }
+  .msg.me .wrap { display: flex; flex-direction: column; align-items: flex-end; }
+  .msg.me .bubble { background: #B7E39A; box-shadow: 2px 2px 0 rgba(107,74,43,0.35); }
+  .msg.su .avatar { background: linear-gradient(135deg,#F472B6,#EC4899); }
+  .msg.me .avatar { background: linear-gradient(135deg,#60A5FA,#3B82F6); }
+  .msg.cop .avatar { background: linear-gradient(135deg,#475569,#1F2937); }
+  .msg.time { justify-content: center; opacity: 1; }
+  .msg.time .bubble { background: transparent; box-shadow: none; border: none; color: #8B7B5A; font-size: 10.5px; padding: 0; }
+
+  /* 正在输入 */
+  .typing { display: flex; align-items: flex-end; opacity: 0; }
+  .typing.on { animation: rise 0.2s ease forwards; }
+  .typing .avatar { width: 38px; height: 38px; border-radius: 4px; flex:0 0 auto; display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:14px; background: linear-gradient(135deg,#F472B6,#EC4899); border: 2px solid #6B4A2B; }
+  .typing .dots { margin:0 8px; background:#FFF8E7; border: 2px solid #6B4A2B; border-radius:4px; padding:12px 14px; }
+  .typing .dots span { display:inline-block; width:6px;height:6px;background:#8B7B5A;margin:0 2px;animation:blink 1.2s infinite; }
+  .typing .dots span:nth-child(2){ animation-delay:0.2s; }
+  .typing .dots span:nth-child(3){ animation-delay:0.4s; }
+  @keyframes blink { 0%,80%,100%{opacity:0.25} 40%{opacity:1} }
+
+  /* 结局页按钮容器 */
+  .choices { flex: 0 0 auto; padding: 10px 14px 16px; background: #F4E4C1; border-top: 3px solid #6B4A2B; display: none; flex-direction: column; gap: 8px; }
+  .choices.show { display: flex; }
+
+  /* 主角的"想法气泡"选项（像素黄框） */
+  .thought-choices { display: none; flex-direction: column; align-items: flex-end; gap: 10px; padding: 14px 16px 18px; background: #F4E4C1; border-top: 3px solid #6B4A2B; }
+  .thought-choices.show { display: flex; }
+  .thought-choices.overlay { position: absolute; left: 0; right: 0; bottom: 0; z-index: 12; background: linear-gradient(to top, rgba(244,228,193,0.98), rgba(244,228,193,0.55), transparent); border-top: none; }
+  .thought-choices .think-tag { align-self: flex-end; font-size: 12px; font-weight: 800; color: #fff; background: #5FB257; border: 2px solid #3E7A33; box-shadow: 2px 2px 0 rgba(74,59,42,0.3); border-radius: 2px; padding: 4px 10px; margin-bottom: 2px; }
+  .thought-bubble {
+    background: #FFF3C9; border: 3px solid #6B4A2B; border-radius: 4px;
+    padding: 14px 16px; font-size: 15.5px; line-height: 1.55; color: #6B4A2B; font-weight: 600;
+    box-shadow: 3px 3px 0 rgba(74,59,42,0.3); cursor: pointer; max-width: 92%; align-self: flex-end;
+    animation: bubblePop 0.4s cubic-bezier(0.2,0.8,0.3,1.25) forwards; opacity: 0; position: relative;
+  }
+  .thought-bubble::before { content: ''; position: absolute; top: -11px; right: 16px; border: 8px solid transparent; border-bottom-color: #6B4A2B; }
+  .thought-bubble::after { content: ''; position: absolute; top: -6px; right: 19px; border: 6px solid transparent; border-bottom-color: #FFF3C9; }
+  .thought-bubble:active { transform: scale(0.96); }
+  .thought-bubble.leaving { animation: bubbleLeave 0.18s ease forwards !important; pointer-events: none; }
+  @keyframes bubblePop { 0% { opacity: 0; transform: scale(0.72) translateY(12px); } 70% { transform: scale(1.05) translateY(-2px); } 100% { opacity: 1; transform: none; } }
+  @keyframes bubbleLeave { to { opacity: 0; transform: scale(0.9) translateX(16px); } }
+
+  /* 结局页按钮（像素方块） */
+  .choice-btn {
+    background: #FFF3C9; border: 3px solid #6B4A2B; color: #6B4A2B;
+    padding: 13px 14px; border-radius: 4px; font-size: 14px; text-align: left;
+    cursor: pointer; transition: all 0.15s; line-height: 1.4; font-weight: 800;
+    box-shadow: 3px 3px 0 rgba(74,59,42,0.35);
+  }
+  .choice-btn:active { background: #E8A33D; color: #fff; transform: translate(2px,2px); box-shadow: 1px 1px 0 rgba(74,59,42,0.35); }
+
+  /* ===== 通用内容屏（星露谷像素） ===== */
+  .content { flex: 1; padding: 18px; overflow-y: auto; background: #F4E4C1; }
+  .content h2 { font-size: 20px; margin-bottom: 6px; color: #6B4A2B; font-weight: 800; text-shadow: 1px 1px 0 rgba(255,255,255,0.6); }
+  .content .task { font-size: 12.5px; color: #3E7A33; font-weight: 800; margin-bottom: 12px; }
+  .content p { font-size: 15px; line-height: 1.7; color: #4A3B2A; margin-bottom: 10px; }
+  .scene-img { width: calc(100% - 28px); height: 34%; object-fit: cover; flex: 0 0 auto; margin: 12px 14px 4px; border-radius: 4px; border: 4px solid #6B4A2B; box-shadow: 5px 5px 0 rgba(74,59,42,0.3); image-rendering: pixelated; }
+  .screen[data-screen="node2"] .scene-img { height: 26%; }
+  .monologue { background: #FFF3C9; border: 3px solid #6B4A2B; border-radius: 4px; padding: 12px 14px; font-size: 14px; color: #6B4A2B; margin: 10px 0; box-shadow: 3px 3px 0 rgba(74,59,42,0.3); font-weight: 700; }
+
+  /* 免税店货架（像素木架） */
+  .shelves { display: flex; flex-direction: column; gap: 6px; margin: 12px 0 4px; }
+  .shelf { display: flex; flex-direction: column; }
+  .shelf-items { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 12px 10px 8px; background: repeating-linear-gradient(90deg,#B8732A 0 16px,#A8621F 16px 18px,#8F5418 18px 34px); border: 3px solid #6B4A2B; border-bottom: none; border-radius: 4px 4px 0 0; box-shadow: 3px 0 0 rgba(74,59,42,0.3); }
+  .shelf-board { height: 12px; background: linear-gradient(180deg,#C97F2B,#8F5418); border: 3px solid #6B4A2B; border-top: none; border-radius: 0 0 4px 4px; box-shadow: 3px 3px 0 rgba(74,59,42,0.3); }
+  .item-card { background: #FFFDF5; border: 3px solid #6B4A2B; border-radius: 4px; padding: 10px 6px 9px; font-size: 12.5px; cursor: pointer; text-align: center; line-height: 1.35; box-shadow: 2px 3px 0 rgba(0,0,0,0.28); font-weight: 800; color: #4A3B2A; transition: border-color 0.15s, background 0.15s, box-shadow 0.15s; position: relative; display: flex; flex-direction: column; align-items: center; gap: 3px; }
+  .item-card .icon { font-size: 30px; display: block; filter: drop-shadow(1px 1px 0 rgba(74,59,42,0.2)); }
+  .item-card .iname { font-size: 12px; }
+  .item-card .icnt { font-size: 11px; color: #C97F2B; font-weight: 800; }
+  .item-card.selected { border-color: #3E7A33; background: #DFF0C9; box-shadow: 2px 3px 0 rgba(62,122,51,0.45); }
+  .item-card.selected::after { content: '✓'; position: absolute; top: -9px; right: -9px; width: 21px; height: 21px; background: #3E7A33; color: #fff; border-radius: 3px; font-size: 13px; line-height: 21px; text-align: center; border: 2px solid #FFF8E7; box-shadow: 2px 2px 0 rgba(0,0,0,0.3); }
+  .item-card.pop { animation: cardPop 0.3s cubic-bezier(0.2,0.8,0.3,1.2); }
+  @keyframes cardPop { 0% { transform: scale(1); } 45% { transform: scale(1.1); } 100% { transform: scale(1); } }
+  .shelf-done { display: block; width: fit-content; margin: 14px auto 4px; background: linear-gradient(180deg,#E8A33D,#C97F2B); color: #fff; border: 3px solid #6B4A2B; border-radius: 4px; padding: 11px 30px; font-size: 14px; font-weight: 800; cursor: pointer; box-shadow: 3px 3px 0 rgba(74,59,42,0.35); animation: donePulse 1.6s ease-in-out infinite; }
+  .shelf-done:active { transform: translate(2px,2px); box-shadow: 1px 1px 0 rgba(74,59,42,0.35); }
+
+  /* X光机 */
+  .xray { background: radial-gradient(ellipse at center, #16213A 0%, #0B1222 70%); border: 4px solid #6B4A2B; border-radius: 4px; padding: 16px; margin: 12px 0; position: relative; height: 330px; overflow: hidden; box-shadow: 4px 4px 0 rgba(74,59,42,0.3); }
+  .xray .screen-label { position: absolute; top: 10px; left: 14px; color: #34D399; font-size: 11px; letter-spacing: 1.5px; font-family: monospace; text-shadow: 1px 1px 0 rgba(0,0,0,0.6); }
+  .xray .scanline { position: absolute; left: 0; right: 0; top: 0; height: 56px; pointer-events: none; background: repeating-linear-gradient(to bottom, transparent 0 8px, rgba(52,211,153,0.25) 8px 10px, transparent 10px 14px); animation: xscan 3s linear infinite; }
+  @keyframes xscan { 0% { transform: translateY(-56px); } 100% { transform: translateY(330px); } }
+  .xray .bag { position: absolute; inset: 34px 16px 40px; border: 2px dashed rgba(148,163,184,0.5); border-radius: 2px; background: rgba(255,255,255,0.03); }
+  .xray .obj { position: absolute; cursor: pointer; padding: 10px 8px 8px; border-radius: 3px; background: rgba(148,163,184,0.18); color: #E2E8F0; font-size: 12.5px; text-align: center; transition: all 0.18s; border: 2px solid rgba(148,163,184,0.4); min-width: 88px; line-height: 1.3; }
+  .xray .obj .ico { display: block; font-size: 26px; margin-bottom: 5px; filter: drop-shadow(0 0 4px rgba(52,211,153,0.5)); }
+  .xray .obj:hover { background: rgba(230,57,70,0.28); border-color: rgba(230,57,70,0.6); transform: scale(1.05); }
+  .xray .obj.picked { background: rgba(230,57,70,0.55); color: #fff; border-color: #E63946; box-shadow: 0 0 14px rgba(230,57,70,0.7); transform: scale(1.06); animation: pickFlash 0.5s ease; }
+  @keyframes pickFlash { 0% { box-shadow: 0 0 0 rgba(230,57,70,0); } 40% { box-shadow: 0 0 28px rgba(230,57,70,0.95); } 100% { box-shadow: 0 0 14px rgba(230,57,70,0.7); } }
+  .xray .obj.picked .ico { filter: drop-shadow(0 0 6px rgba(255,255,255,0.6)); }
+  .xray-done { position: absolute; right: 14px; bottom: 12px; background: #34D399; color: #06281C; border: 2px solid #0E5A3D; border-radius: 3px; padding: 8px 14px; font-size: 12.5px; font-weight: 800; cursor: pointer; box-shadow: 2px 2px 0 rgba(0,0,0,0.45); z-index: 3; animation: donePulse 1.6s ease-in-out infinite; }
+  .xray-done:active { transform: translate(1px,1px); box-shadow: 1px 1px 0 rgba(0,0,0,0.45); }
+  @keyframes donePulse { 0%,100% { opacity: 1; } 50% { opacity: 0.72; } }
+
+  /* 结局（像素卡） */
+  .ending-img { width: calc(100% - 28px); height: 38%; object-fit: cover; flex: 0 0 auto; margin: 12px 14px 4px; border-radius: 4px; border: 4px solid #6B4A2B; box-shadow: 5px 5px 0 rgba(74,59,42,0.3); image-rendering: pixelated; }
+  .ending-body { flex: 1; padding: 20px; overflow-y: auto; background: #F4E4C1; }
+  .ending-body .badge { display: inline-block; padding: 4px 12px; border-radius: 3px; font-size: 12px; font-weight: 800; margin-bottom: 12px; border: 2px solid #6B4A2B; box-shadow: 2px 2px 0 rgba(74,59,42,0.3); }
+  .ending-body h2 { font-size: 22px; margin-bottom: 14px; color: #6B4A2B; font-weight: 800; text-shadow: 1px 1px 0 rgba(255,255,255,0.6); }
+  .ending-body p { font-size: 14.5px; line-height: 1.75; color: #4A3B2A; margin-bottom: 10px; }
+  .ending-body .naike-say { background: #FFF3C9; border: 3px solid #6B4A2B; border-radius: 4px; padding: 12px 14px; font-size: 13.5px; color: #6B4A2B; margin-top: 14px; box-shadow: 3px 3px 0 rgba(74,59,42,0.3); font-weight: 700; }
+
+  /* 结果（像素面板） */
+  .result-wrap { flex: 1; padding: 16px; overflow-y: auto; background: #F4E4C1; }
+  .result-canvas-box { width: 100%; border-radius: 4px; overflow: hidden; box-shadow: 5px 5px 0 rgba(74,59,42,0.3); background: #fff; border: 4px solid #6B4A2B; }
+  .result-canvas-box canvas { width: 100%; display: block; }
+  .result-actions { display: flex; gap: 10px; margin-top: 14px; }
+  .result-actions button { flex: 1; padding: 13px; border-radius: 4px; font-size: 14px; cursor: pointer; font-weight: 800; border: 3px solid #6B4A2B; box-shadow: 3px 3px 0 rgba(74,59,42,0.35); }
+  .btn-primary { background: linear-gradient(180deg,#E8A33D,#C97F2B); color: #fff; }
+  .btn-primary:active { transform: translate(2px,2px); box-shadow: 1px 1px 0 rgba(74,59,42,0.35); }
+  .btn-ghost { background: #FFF8E7; color: #6B4A2B; }
+  .report-guide { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 14px 0 4px; color: #6B4A2B; font-size: 15px; font-weight: 800; background: #FFF3C9; border: 3px solid #6B4A2B; border-radius: 4px; padding: 10px; box-shadow: 3px 3px 0 rgba(74,59,42,0.3); animation: guidePulse 1.8s ease-in-out infinite; }
+  @keyframes guidePulse { 0%,100% { transform: translateY(0); } 50% { transform: translateY(4px); } }
+
+  /* 风险评估报告 */
+  .risk-report { margin-top: 16px; display: flex; flex-direction: column; gap: 14px; }
+  .risk-report > * { animation: childIn 0.5s cubic-bezier(0.22,0.68,0.36,1) both; }
+  .risk-report > *:nth-child(1) { animation-delay: 0.08s; }
+  .risk-report > *:nth-child(2) { animation-delay: 0.18s; }
+  .risk-report > *:nth-child(3) { animation-delay: 0.28s; }
+  .risk-report > *:nth-child(4) { animation-delay: 0.38s; }
+  .risk-report > *:nth-child(n+5) { animation-delay: 0.48s; }
+  .report-card { background: #FFF8E7; border-radius: 4px; padding: 16px; box-shadow: 3px 3px 0 rgba(74,59,42,0.3); border: 3px solid #6B4A2B; }
+  .report-card h3 { font-size: 15px; margin-bottom: 4px; color: #6B4A2B; display: flex; align-items: center; gap: 6px; font-weight: 800; }
+  .report-card .sub { font-size: 11.5px; color: #8B7B5A; margin-bottom: 10px; }
+  .risk-level { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; border-radius: 3px; color: #fff; border: 2px solid rgba(0,0,0,0.2); }
+  .risk-level .lv { font-size: 15px; font-weight: 800; }
+  .risk-level .txt { font-size: 12px; opacity: 0.95; margin-top: 2px; }
+  .risk-level .pct { font-size: 22px; font-weight: 800; }
+  /* 维度条形 */
+  .dim { margin-bottom: 12px; }
+  .dim:last-child { margin-bottom: 0; }
+  .dim .dhead { display: flex; justify-content: space-between; font-size: 12.5px; margin-bottom: 4px; }
+  .dim .dhead .dname { color: #4A3B2A; font-weight: 700; }
+  .dim .dhead .dval { color: #C97F2B; font-weight: 800; }
+  .dim .track { height: 10px; background: #E8DEC2; border: 2px solid #6B4A2B; border-radius: 0; overflow: hidden; }
+  .dim .fill { height: 100%; border-radius: 0; background: repeating-linear-gradient(90deg, #5FB257 0 10px, #3E7A33 10px 12px); width: 0; transition: width 0.8s ease; }
+  .dim .dnote { font-size: 10.5px; color: #8B7B5A; margin-top: 3px; }
+  /* 踩坑清单 */
+  .pit-list { list-style: none; }
+  .pit-list li { display: flex; gap: 8px; font-size: 13px; line-height: 1.6; color: #4A3B2A; padding: 6px 0; border-bottom: 2px dashed #D8C79A; }
+  .pit-list li:last-child { border-bottom: none; }
+  .pit-list .x { color: #E63946; font-weight: 700; flex: 0 0 auto; }
+  .pit-list .ok { color: #16A34A; font-weight: 700; flex: 0 0 auto; }
+  .warn-box { background: #FFE4D6; border: 3px solid #A14434; border-radius: 4px; padding: 14px; box-shadow: 3px 3px 0 rgba(74,59,42,0.3); }
+  .warn-box .wt { font-size: 13px; color: #A14434; font-weight: 800; margin-bottom: 6px; }
+  .warn-box p { font-size: 13px; line-height: 1.7; color: #A14434; }
+  .advice { background: #DFF0C9; border: 3px solid #3E7A33; border-radius: 4px; padding: 14px; box-shadow: 3px 3px 0 rgba(74,59,42,0.3); }
+  .advice .at { font-size: 13px; color: #2E5C31; font-weight: 800; margin-bottom: 6px; }
+  .advice p { font-size: 13px; line-height: 1.7; color: #2E5C31; }
+
+  /* 那客普法弹窗（居中 + 遮罩强警示） */
+  .naike-mask { position: absolute; inset: 0; background: rgba(58,38,22,0.55); z-index: 39; display: none; }
+  .naike-mask.show { display: block; animation: fadeIn 0.2s ease; }
+  .naike-popup {
+    position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%);
+    width: 88%; max-width: 360px; z-index: 40;
+    background: #FFF8E7; border: 4px solid #6B4A2B; border-radius: 6px; padding: 18px;
+    box-shadow: 6px 6px 0 rgba(74,59,42,0.4); display: none;
+  }
+  .naike-popup.show { display: block; animation: popIn 0.35s cubic-bezier(0.2,0.8,0.3,1.2); }
+  @keyframes popIn { 0% { opacity: 0; transform: translate(-50%,-50%) scale(0.7); } 100% { opacity: 1; transform: translate(-50%,-50%) scale(1); } }
+  .naike-popup .naike-head { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .naike-popup .naike-head img { width: 46px; height: 46px; border-radius: 4px; object-fit: cover; border: 3px solid #6B4A2B; box-shadow: 2px 2px 0 rgba(74,59,42,0.3); image-rendering: pixelated; }
+  .naike-popup .naike-head .label { display: inline-block; background: linear-gradient(180deg,#5FB257,#3E7A33); color: #fff; font-size: 13px; padding: 5px 12px; border-radius: 2px; font-weight: 800; margin: 0; border: 2px solid #2E5C31; }
+  .naike-popup p { font-size: 14.5px; line-height: 1.75; color: #4A3B2A; }
+  .naike-popup p strong { color: #A14434; }
+  .naike-popup .got-it { margin-top: 12px; background: linear-gradient(180deg,#E8A33D,#C97F2B); color: #fff; border: 3px solid #6B4A2B; padding: 10px 24px; border-radius: 4px; font-size: 14px; cursor: pointer; display: block; margin-left: auto; font-weight: 800; box-shadow: 3px 3px 0 rgba(74,59,42,0.35); }
+  .naike-popup .got-it:active { transform: translate(2px,2px); box-shadow: 1px 1px 0 rgba(74,59,42,0.35); }
+
+  .corner-aigc { position: absolute; top: 46px; right: 8px; font-size: 9px; color: #9CA3AF; background: rgba(255,255,255,0.85); padding: 1px 5px; border-radius: 6px; z-index: 6; }
+</style>
+</head>
+<body>
+
+<div class="phone">
+  <div class="topbar">
+    <div class="title">那客提醒 · 学姐的箱子</div>
+    <div class="aigc-tag">AI 辅助创作</div>
+  </div>
+
+  <div class="stage" id="stage">
+    <div class="corner-aigc">AI 生成</div>
+
+    <!-- 第一页：开场故事 -->
+    <div class="screen intro-screen" data-screen="intro">
+      <div class="intro-deco">
+        <div class="moon"></div>
+        <div class="star s1"></div><div class="star s2"></div><div class="star s3"></div><div class="star s4"></div><div class="star s5"></div>
+        <div class="cloud c1"></div><div class="cloud c2"></div>
+      </div>
+      <div class="pline" data-pline>我是一名即将实习的大三学生。</div>
+      <div class="pline" data-pline>临近实习，想给自己置办几件新衣服，可惜钱包不太争气。</div>
+      <div class="pline" data-pline>某天睡醒，我莫名被拉进一个"海外代购"群，群里还有我认识的学姐。</div>
+      <div class="pline" data-pline>刚进群时我也犯嘀咕——入群邀请来得莫名其妙，代购信息看着也怪。可熟人在群里，几次代购还都顺顺当当成交了，我慢慢也就不警惕了。</div>
+      <div class="pline hl" data-pline>直到我刷到了这位学姐的朋友圈。</div>
+      <div class="tap" id="introTap">点击进入朋友圈 ▸</div>
+    </div>
+
+    <!-- 朋友圈（真实列表） -->
+    <div class="moments-view" id="momentsView">
+      <div class="moments-nav">
+        <span class="cam">📷</span>朋友圈<span class="dots">⋯</span>
+      </div>
+      <div class="moments-list">
+        <div class="moments-item">
+          <div class="avatar" style="background:linear-gradient(135deg,#FBBF24,#F59E0B);">宋</div>
+          <div class="main">
+            <div class="nm">宋小雨</div>
+            <div class="body">今天食堂的糖醋里脊也太好吃了吧🤤</div>
+            <div class="pics"><div class="pic single"><img src="assets/moments/food.jpg" alt="糖醋里脊"></div></div>
+            <div class="foot">
+              <span class="tm">12 分钟前</span>
+              <span class="ops"><span class="like-box">❤️ 2</span><span class="cmt-box">评论 5</span></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="moments-item su-item" id="momentsItem">
+          <div class="avatar">念</div>
+          <div class="main">
+            <div class="nm">苏念学姐<span class="su-tag">💬 私聊</span></div>
+            <div class="body">
+              🌴 海南毕业旅行，最后 2 个名额！<br>
+              返程顺便帮姐妹们带点免税好物：<br>
+              <span class="hl">手表 / 香水 / 精华</span> 都能带<br>
+              提成好商量，就当请我喝杯奶茶～<br>
+              想去的滴滴我🙋
+            </div>
+            <div class="pics">
+              <div class="pic"><img src="assets/moments/beach1.jpg" alt="三亚沙滩"></div>
+              <div class="pic"><img src="assets/moments/beach2.jpg" alt="椰林海滩"></div>
+              <div class="pic"><img src="assets/moments/beach3.jpg" alt="海边日落"></div>
+            </div>
+            <div class="foot">
+              <span class="tm">18 分钟前 · 海口</span>
+              <span class="ops"><span class="like-box">❤️ 8</span><span class="cmt-box">评论 12</span></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="moments-item">
+          <div class="avatar" style="background:linear-gradient(135deg,#34D399,#10B981);">周</div>
+          <div class="main">
+            <div class="nm">周一帆</div>
+            <div class="body">ddl 是人类的敌人。💻</div>
+            <div class="pics"><div class="pic single"><img src="assets/moments/study.jpg" alt="赶ddl"></div></div>
+            <div class="foot">
+              <span class="tm">26 分钟前</span>
+              <span class="ops"><span class="like-box">❤️ 1</span><span class="cmt-box">评论 3</span></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="moments-item">
+          <div class="avatar" style="background:linear-gradient(135deg,#A78BFA,#8B5CF6);">杨</div>
+          <div class="main">
+            <div class="nm">杨梅</div>
+            <div class="body">图书馆占到位置了，开心😭</div>
+            <div class="pics"><div class="pic single"><img src="assets/moments/library.jpg" alt="图书馆"></div></div>
+            <div class="foot">
+              <span class="tm">35 分钟前</span>
+              <span class="ops"><span class="like-box">❤️ 3</span><span class="cmt-box">评论 6</span></span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="moments-tip" id="momentsTap"><span class="tip-icon">💬</span>点苏念学姐这条动态，私聊她</div>
+    </div>
+
+    <!-- 节点①：微信私聊 -->
+    <div class="screen" data-screen="node1">
+      <div class="chat" id="chatNode1">
+        <div class="msg time"><div class="bubble">今天 22:14</div></div>
+      </div>
+      <div class="thought-choices" id="choicesNode1"></div>
+    </div>
+
+    <!-- 节点① 科普后重选 -->
+    <div class="screen" data-screen="node1-explain">
+      <div class="chat" id="chatExplain"></div>
+      <div class="thought-choices" id="choicesExplain"></div>
+    </div>
+
+    <!-- 节点②：免税店点选 -->
+    <div class="screen" data-screen="node2">
+      <img class="scene-img" src="assets/scene-dutyfree.jpg" alt="海南免税城">
+      <div class="content">
+        <h2>海口国际免税城</h2>
+        <div class="task">你要做什么：帮学姐拿清单上的东西</div>
+        <p>到了店里，学姐塞来一张手写清单：</p>
+        <div class="monologue">腕表 ×2 ｜ 香水 ×4 ｜ 精华液 ×6 ｜ 香烟 ×4 ｜ 奶粉 ×2</div>
+        <p style="font-size:13px;color:#6B7280;">选好你打算拿的（可多选）</p>
+        <div class="shelves" id="items-grid">
+          <div class="shelf">
+            <div class="shelf-items">
+              <div class="item-card" data-item="watch"><span class="icon">⌚</span><span class="iname">腕表</span><span class="icnt">×2</span></div>
+              <div class="item-card" data-item="perfume"><span class="icon">🧴</span><span class="iname">香水</span><span class="icnt">×4</span></div>
+              <div class="item-card" data-item="essence"><span class="icon">💧</span><span class="iname">精华液</span><span class="icnt">×6</span></div>
+            </div>
+            <div class="shelf-board"></div>
+          </div>
+          <div class="shelf">
+            <div class="shelf-items">
+              <div class="item-card" data-item="cig"><span class="icon">🚬</span><span class="iname">香烟</span><span class="icnt">×4</span></div>
+              <div class="item-card" data-item="milk"><span class="icon">🥛</span><span class="iname">奶粉</span><span class="icnt">×2</span></div>
+              <div class="item-card" data-item="none" style="background:#F9FAFB;border-style:dashed;color:#6B7280;">我只拿自己用的</div>
+            </div>
+            <div class="shelf-board"></div>
+          </div>
+        </div>
+        <div class="shelf-done" onclick="node2Confirm()">就这些了 ✓</div>
+      </div>
+    </div>
+
+    <!-- 节点③：X光机 -->
+    <div class="screen" data-screen="node3">
+      <div class="content" style="background:#0F172A;color:#E5E7EB;flex:1;display:flex;flex-direction:column;">
+        <h2 style="color:#F4B942;">回程 · 美兰机场安检</h2>
+        <div class="task">你要做什么：指出 X 光机里有问题、需要申报的东西</div>
+        <p style="color:#CBD5E1;font-size:13.5px;">陈警官走过来："这位同学，行李过一下。"</p>
+        <div class="xray">
+          <div class="screen-label">X-RAY · BAG 07 · SCANNING</div>
+          <div class="scanline"></div>
+          <div class="bag">
+            <div class="obj" data-obj="watch" style="top:6px;left:16px;"><span class="ico">⌚</span>手表（箱内）</div>
+            <div class="obj" data-obj="perfume" style="top:6px;right:16px;"><span class="ico">🧴</span>化妆品一堆</div>
+            <div class="obj" data-obj="cig" style="top:112px;left:16px;"><span class="ico">🚬</span>香烟 4 条</div>
+            <div class="obj" data-obj="milk" style="top:112px;right:16px;"><span class="ico">🥛</span>奶粉 2 罐</div>
+            <div class="obj" data-obj="box" style="top:215px;left:36%;"><span class="ico">📦</span>学姐的"小盒子"</div>
+          </div>
+          <div class="xray-done" onclick="node3Confirm()">确认完毕 ✓</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 节点④：海关问话 -->
+    <div class="screen" data-screen="node4">
+      <img class="scene-img" src="assets/scene-customs-office.jpg" alt="海关办公室">
+      <div class="content">
+        <h2>海关办公室</h2>
+        <div class="task">你要做什么：回答陈警官</div>
+        <p>陈警官看着你："同学，这些东西，是你自己用的吗？"</p>
+      </div>
+      <div class="thought-choices show overlay">
+        <div class="think-tag">💭 我心想</div>
+        <div class="thought-bubble" onclick="bubbleTap(this, () => node4Choose('A'))">「是……是我自己买的。」（嘴硬）</div>
+        <div class="thought-bubble" onclick="bubbleTap(this, () => node4Choose('B'))">「警官我说实话，是学姐让我帮她带的，我真不知道这违法。」（坦白）</div>
+        <div class="thought-bubble" onclick="bubbleTap(this, () => node4Choose('C'))">「我不知道，都是学姐安排的，跟我没关系。」（甩锅）</div>
+      </div>
+    </div>
+
+    <!-- 节点⑤：终局微信 -->
+    <div class="screen" data-screen="node5">
+      <div class="chat" id="chatNode5">
+        <div class="msg time"><div class="bubble">今天 23:58</div></div>
+      </div>
+      <div class="thought-choices" id="choicesNode5"></div>
+    </div>
+
+    <!-- 结局 A -->
+    <div class="screen" data-screen="endingA">
+      <img class="ending-img" src="assets/scene-document.jpg" alt="处理通知书">
+      <div class="ending-body">
+        <span class="badge" style="background:#FEE2E2;color:#991B1B;">坏结局</span>
+        <h2>快钱陷阱</h2>
+        <p>经海关查实，你携带的免税物品货值约 3.8 万元，逃缴税款约 1.1 万元。</p>
+        <p>因你系初犯、主动配合补缴，海关依法作出行政处罚：<strong>没收走私货物、罚款 1.5 万元、线索移送学校学生处。</strong></p>
+        <p>你那 200 块提成，换来的是——记过处分、征信记录、以及以后每次过海关都要被"重点关照"的三年。</p>
+        <div class="naike-say">那客：离岛免税套代购，不是"帮个忙"，是走私。法律面前，"我不知道"不是免责金牌。</div>
+      </div>
+      <div class="choices show">
+        <button class="choice-btn" onclick="showResult()">查看我的反走私人格 →</button>
+      </div>
+    </div>
+
+    <!-- 结局 B -->
+    <div class="screen" data-screen="endingB">
+      <img class="ending-img" src="assets/scene-gate.jpg" alt="走出海关">
+      <div class="ending-body">
+        <span class="badge" style="background:#DCFCE7;color:#166534;">好结局</span>
+        <h2>悬崖勒马</h2>
+        <p>你主动向海关说明情况，提供了学姐的聊天记录和转账截图。</p>
+        <p>因你系被裹挟参与、且有立功表现，海关对你作出<strong>不予行政处罚</strong>决定，货物补缴税款即可。</p>
+        <p>同一天，学姐苏念因组织多人套代购、累计逃税 8.6 万元，被<strong>刑事立案</strong>。</p>
+        <p>你后来把这次经历写成了案例，成了学院反走私宣讲团的骨干。那块新平板，你用奖学金和正规兼职攒到了。</p>
+        <div class="naike-say">那客：犯错不可怕，可怕的是一路走到黑。12360，海关服务热线，你打的每一个电话都在保护自己。</div>
+      </div>
+      <div class="choices show">
+        <button class="choice-btn" onclick="showResult()">查看我的反走私人格 →</button>
+      </div>
+    </div>
+
+    <!-- 结局 C -->
+    <div class="screen" data-screen="endingC">
+      <img class="ending-img" src="assets/scene-dorm.jpg" alt="灰色宿舍">
+      <div class="ending-body">
+        <span class="badge" style="background:#E5E7EB;color:#374151;">灰结局</span>
+        <h2>糊涂共犯</h2>
+        <p>你虽然向海关说了实话，但在学姐的威胁下，没有提供聊天记录和转账凭证。</p>
+        <p>海关最终认定：你构成走私行为但情节较轻，<strong>没收货物 + 罚款 8000 元</strong>。</p>
+        <p>学姐因证据不足仅被行政处罚，但她转头就把所有责任推到了你身上。</p>
+        <p>你既没赚到钱，也没保住学姐，还赔上了处分。</p>
+        <div class="naike-say">那客：共犯的意思是——你以为自己只是搭个便车，其实已经在同一条船上。</div>
+      </div>
+      <div class="choices show">
+        <button class="choice-btn" onclick="showResult()">查看我的反走私人格 →</button>
+      </div>
+    </div>
+
+    <!-- 结局 D -->
+    <div class="screen" data-screen="endingD">
+      <img class="ending-img" src="assets/scene-library.jpg" alt="图书馆">
+      <div class="ending-body">
+        <span class="badge" style="background:#FEF3C7;color:#92400E;">隐藏好结局</span>
+        <h2>清醒的人</h2>
+        <p>你没有接学姐的单。</p>
+        <p>三个月后，你在学校通报里看到：某大三学生因组织离岛免税套代购，被学校<strong>开除学籍</strong>，案件已移送司法机关。</p>
+        <p>你默默把奖学金存进了平板基金——这一次，每一分钱都是干净的。</p>
+        <div class="naike-say">那客：全民反走私，从拒绝第一个"轻松赚快钱"的请求开始。你，就是参与者。</div>
+      </div>
+      <div class="choices show">
+        <button class="choice-btn" onclick="showResult()">查看我的反走私人格 →</button>
+      </div>
+    </div>
+
+    <!-- 结果 -->
+    <div class="screen" data-screen="result">
+      <div class="result-wrap">
+        <h2 style="font-size:20px;margin-bottom:10px;color:#6B4A2B;">你的反走私风险评估</h2>
+        <div class="result-canvas-box">
+          <canvas id="posterCanvas" width="750" height="1334"></canvas>
+        </div>
+        <div class="report-guide">👇 下滑看分析</div>
+        <div class="risk-report" id="riskReport"></div>
+        <div class="result-actions">
+          <button class="btn-ghost" onclick="restart()">再玩一次</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 那客普法弹窗 -->
+    <div class="naike-mask" id="naikeMask"></div>
+    <div class="naike-popup" id="naikePopup">
+      <div class="naike-head">
+        <img src="assets/naike.jpg" alt="那客">
+        <span class="label">⚠️ 那客普法时间</span>
+      </div>
+      <div id="naikeText"></div>
+      <button class="got-it" id="naikeGot">我知道了</button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  // ===== 星露谷像素化：图片运行时降采样成像素风 =====
+  function pixelateImg(img, targetW) {
+    if (img.dataset.pxDone) return;
+    img.dataset.pxDone = '1';
+    try {
+      const c = document.createElement('canvas');
+      const ratio = img.naturalHeight / (img.naturalWidth || 1);
+      c.width = targetW; c.height = Math.max(1, Math.round(targetW * ratio));
+      const ctx = c.getContext('2d');
+      ctx.imageSmoothingEnabled = false;
+      ctx.drawImage(img, 0, 0, c.width, c.height);
+      img.src = c.toDataURL('image/png');
+    } catch (e) {}
+  }
+  function pxAll() {
+    document.querySelectorAll('.scene-img, .ending-img').forEach(im => {
+      if (im.complete) pixelateImg(im, 150); else im.addEventListener('load', () => pixelateImg(im, 150), { once: true });
+    });
+    document.querySelectorAll('.moments-item .pic img').forEach(im => {
+      if (im.complete) pixelateImg(im, 56); else im.addEventListener('load', () => pixelateImg(im, 56), { once: true });
+    });
+    document.querySelectorAll('.naike-head img').forEach(im => {
+      if (im.complete) pixelateImg(im, 64); else im.addEventListener('load', () => pixelateImg(im, 64), { once: true });
+    });
+  }
+  pxAll();
+
+  // ===== 状态 =====
+  const state = {
+    stage:'boot', riskScore:0, adventureScore:0, helpedPolice:false, node4:null, ending:null,
+    dim: { law:0, self:0, resist:0, verify:0, luck:0 },   // 法律意识/自保/同伴抵抗/信息核实/侥幸
+    flags: { lie:false, shift:false, help:false, missedCig:false, missedBox:false, tookIllegal:false }
+  };
+
+  function show(name) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    const el = document.querySelector(`.screen[data-screen="${name}"]`);
+    if (el) el.classList.add('active');
+    state.stage = name;
+    closeNaike();
+  }
+  function closeNaike() { document.getElementById('naikePopup').classList.remove('show'); document.getElementById('naikeMask').classList.remove('show'); }
+  // 想法气泡点击：先播放离开动画，再执行选择
+  function bubbleTap(el, fn) {
+    if (el.classList.contains('leaving')) return;
+    el.classList.add('leaving');
+    setTimeout(fn, 170);
+  }
+  function naikeSay(html, next) {
+    document.getElementById('naikeText').innerHTML = html;
+    document.getElementById('naikeGot').onclick = () => { closeNaike(); if (next) next(); };
+    document.getElementById('naikePopup').classList.add('show');
+    document.getElementById('naikeMask').classList.add('show');
+  }
+
+  // ===== 开场：开场故事 → 朋友圈 → 私聊 =====
+  const momentsView = document.getElementById('momentsView');
+  const introScreen = document.querySelector('.screen[data-screen="intro"]');
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  introScreen.classList.add('active');   // 进页面先看开场故事
+
+  // 开场故事逐行浮现
+  function playIntro() {
+    const lines = document.querySelectorAll('#stage .pline[data-pline]');
+    let i = 0;
+    document.getElementById('introTap').style.opacity = 0;
+    const next = () => {
+      if (i < lines.length) {
+        lines[i].classList.add('on');
+        i++;
+        const delay = i === 5 ? 1300 : (i === 4 ? 1200 : 1000);
+        setTimeout(next, delay);
+      } else {
+        document.getElementById('introTap').style.opacity = 1;
+      }
+    };
+    setTimeout(next, 200);
+  }
+  playIntro();
+
+  document.getElementById('introTap').addEventListener('click', () => {
+    introScreen.style.transition = 'opacity 0.35s, transform 0.35s';
+    introScreen.style.opacity = 0;
+    introScreen.style.transform = 'scale(0.97)';
+    introScreen.style.pointerEvents = 'none';
+    setTimeout(() => momentsView.classList.add('show'), 300);
+  });
+
+  // 点学姐那条动态 → 私聊
+  const momentsItem = document.getElementById('momentsItem');
+  const momentsTap = document.getElementById('momentsTap');
+  function tapMoments() {
+    momentsView.style.transition = 'opacity 0.3s, transform 0.3s';
+    momentsView.style.opacity = 0;
+    momentsView.style.transform = 'scale(1.02)';
+    momentsView.style.pointerEvents = 'none';
+    setTimeout(() => goNode1(), 300);
+  }
+  momentsItem.addEventListener('click', tapMoments);
+  momentsTap.addEventListener('click', tapMoments);
+
+  // ===== 通用微信聊天推进器 =====
+  // messages: {from:'su'|'me'|'cop', text}，逐条弹出；消息间学姐消息前显示"正在输入"
+  function buildChat(container, messages, options, onSelect) {
+    container.innerHTML = '<div class="msg time"><div class="bubble">今天 22:14</div></div>';
+    let i = 0, finished = false;
+    function addMsg(m) {
+      const el = document.createElement('div');
+      const who = m.from === 'me' ? '我' : (m.from === 'cop' ? '陈警官' : '苏念学姐');
+      const cls = m.from === 'me' ? 'me' : (m.from === 'cop' ? 'other cop' : 'other su');
+      el.className = 'msg ' + cls;
+      el.innerHTML = `<div class="avatar">${who[0]}</div>
+        <div class="wrap"><div class="name">${who}</div><div class="bubble"></div></div>`;
+      el.querySelector('.bubble').textContent = m.text;
+      container.appendChild(el);
+      setTimeout(() => el.classList.add('on'), 20);
+      container.scrollTop = container.scrollHeight;
+    }
+    function pushTyping() {
+      const t = document.createElement('div');
+      t.className = 'typing';
+      t.innerHTML = '<div class="avatar">念</div><div class="dots"><span></span><span></span><span></span></div>';
+      container.appendChild(t);
+      setTimeout(() => t.classList.add('on'), 20);
+      container.scrollTop = container.scrollHeight;
+      return t;
+    }
+    function step() {
+      if (finished) return;
+      if (i < messages.length) {
+        const m = messages[i];
+        const needTyping = m.from === 'su' && i > 0;
+        const t = needTyping ? pushTyping() : null;
+        setTimeout(() => {
+          if (t) t.remove();
+          addMsg(m);
+          i++;
+          setTimeout(step, 260);
+        }, needTyping ? 800 : 0);
+      } else {
+        finished = true;
+        const box = container.closest('.screen').querySelector('.thought-choices');
+        box.innerHTML = '';
+        const tag = document.createElement('div');
+        tag.className = 'think-tag'; tag.textContent = '💭 我心想';
+        box.appendChild(tag);
+        options.forEach((o, idx) => {
+          const b = document.createElement('div');
+          b.className = 'thought-bubble';
+          b.style.animationDelay = (0.12 * (idx + 1)) + 's';
+          b.textContent = o.text;
+          b.onclick = () => bubbleTap(b, () => onSelect(o.id));
+          box.appendChild(b);
+        });
+        box.classList.add('show');
+        box.classList.add('overlay');
+      }
+    }
+    step();
+  }
+
+  // ===== 节点①：学姐私聊（现实话术） =====
+  function goNode1() {
+    show('node1');
+    const msgs = [
+      { from:'su', text:'在吗宝～' },
+      { from:'su', text:'正好有个事，想请你帮个忙🙏' },
+      { from:'su', text:'我下个月去海南，返程想多带点东西回来，你帮我拎几件呗' },
+      { from:'su', text:'提成我照给，好多姐妹都帮过我带，贼简单' },
+      { from:'su', text:'你就当去玩一趟，机票酒店都包，钱是白赚的～' }
+    ];
+    const opts = [
+      { id:'A', text:'「行啊，我正好缺钱，去！」' },
+      { id:'B', text:'「等等，帮别人带免税品，不是违法的吗？」' },
+      { id:'C', text:'「算啦，我这段时间不方便。」' }
+    ];
+    buildChat(document.getElementById('chatNode1'), msgs, opts, node1Choose);
+  }
+
+  function node1Choose(opt) {
+    if (opt === 'A') {
+      state.adventureScore += 2; state.dim.luck += 2; state.dim.resist -= 1;
+      goNode2();
+    }
+    else if (opt === 'B') {
+      state.riskScore += 1; state.dim.law += 1; state.dim.verify += 1;
+      naikeSay('<p>离岛免税购物有个硬规矩：<strong>限本人使用、不得二次销售或转让牟利</strong>。</p><p>学姐说的"顺手帮忙"，本质就是"套代购"——把免税额度套出来倒卖，这就是走私。</p>', () => goNode1Explain());
+    }
+    else if (opt === 'C') {
+      state.riskScore += 2; state.dim.law += 1; state.dim.self += 2; state.dim.resist += 2;
+      state.ending='D'; show('endingD');
+    }
+  }
+
+  function goNode1Explain() {
+    show('node1-explain');
+    const msgs = [
+      { from:'su', text:'哎呀你想多啦，我们这叫"拼单"，海关不管的～' },
+      { from:'me', text:'真的吗……' }
+    ];
+    const opts = [
+      { id:'go', text:'被说服了，还是去吧' },
+      { id:'no', text:'算了，我还是不去了' }
+    ];
+    buildChat(document.getElementById('chatExplain'), msgs, opts, (id) => {
+      if (id === 'go') { state.adventureScore += 2; state.dim.luck += 2; state.dim.resist -= 1; goNode2(); }
+      else { state.riskScore += 2; state.dim.law += 1; state.dim.self += 2; state.dim.resist += 2; state.ending='D'; show('endingD'); }
+    });
+  }
+
+  // ===== 节点②：物品点选 =====
+  function goNode2() { show('node2'); }
+  const selectedItems = new Set();
+  document.querySelectorAll('#items-grid .item-card').forEach(card => {
+    card.addEventListener('click', () => {
+      card.classList.remove('pop'); void card.offsetWidth; card.classList.add('pop');
+      const item = card.dataset.item;
+      if (item === 'none') {
+        selectedItems.clear(); selectedItems.add('none');
+        document.querySelectorAll('#items-grid .item-card').forEach(c => c.classList.remove('selected'));
+        card.classList.add('selected');
+      } else {
+        selectedItems.delete('none');
+        document.querySelector('#items-grid .item-card[data-item="none"]').classList.remove('selected');
+        card.classList.toggle('selected');
+        card.classList.contains('selected') ? selectedItems.add(item) : selectedItems.delete(item);
+      }
+    });
+  });
+  function node2Confirm() {
+    const cig = selectedItems.has('cig'), none = selectedItems.has('none');
+    const all = selectedItems.size >= 4 && !none;
+    if (none) {
+      state.riskScore += 1; state.dim.law += 1; state.dim.verify += 1;
+      naikeSay('<p>这才是离岛免税的正确打开方式：<strong>自己买、自己用、自己留着</strong>。</p>', goNode3);
+    } else if (cig) {
+      state.dim.law -= 1; state.dim.verify -= 1; state.flags.missedCig = true;
+      naikeSay('<p><strong>香烟离岛免税限额是每人每年 400 支（2 条）</strong>，你点了 4 条，已经超额。</p><p>而且最关键的事你忘了——这些根本不是你自己用的，是帮学姐带回去卖的。</p>', goNode3);
+    } else if (all) {
+      state.dim.law -= 1; state.dim.verify -= 1; state.flags.tookIllegal = true;
+      naikeSay('<p>你忘了最关键的事——这些根本不是你自己用的，是帮学姐带回去卖的。</p><p><strong>不管限不限量，只要收提成帮人带，就是套代购走私。</strong></p>', goNode3);
+    } else {
+      state.dim.law -= 1; state.dim.verify -= 1; state.flags.tookIllegal = true;
+      naikeSay('<p>你可能觉得"我就帮带一点点"。</p><p>但海关看的不是数量，是<strong>目的</strong>：收提成、帮他人带货倒卖，就是走私行为。</p>', goNode3);
+    }
+  }
+
+  // ===== 节点③：X光机 =====
+  function goNode3() { show('node3'); }
+  const pickedObjs = new Set();
+  document.querySelectorAll('.xray .obj').forEach(obj => {
+    obj.addEventListener('click', () => {
+      obj.classList.toggle('picked');
+      obj.classList.contains('picked') ? pickedObjs.add(obj.dataset.obj) : pickedObjs.delete(obj.dataset.obj);
+    });
+  });
+  function node3Confirm() {
+    let score = 0;
+    if (pickedObjs.has('watch')) score++;
+    if (pickedObjs.has('cig')) score++;
+    if (pickedObjs.has('box')) score++;
+    if (score >= 2) { state.riskScore += 2; state.dim.verify += 2; }
+    if (pickedObjs.has('box')) {
+      state.dim.verify += 1;
+      naikeSay('<p>学姐说这是"工艺品"？如果是<strong>文物、象牙、玳瑁、砗磲这类濒危物种制品</strong>，那走的就不是补税的事了，是走私珍贵动物制品罪。</p><p>另外：<strong>逃税累计达到 5 万元，就是刑事立案标准。</strong></p>', goNode4);
+    } else {
+      state.flags.missedBox = true;
+      naikeSay('<p>你可能漏了那个小盒子。</p><p>学姐说它是"工艺品"？如果是文物或濒危物种制品，那走的就不是补税的事了。</p><p><strong>逃税累计达到 5 万元，就是刑事立案标准。</strong></p>', goNode4);
+    }
+  }
+
+  // ===== 节点④：海关问话 =====
+  function goNode4() { show('node4'); }
+  function node4Choose(opt) {
+    state.node4 = opt;
+    if (opt === 'A') {
+      state.adventureScore += 2; state.dim.luck += 2; state.dim.self -= 2; state.flags.lie = true;
+      naikeSay('<p>陈警官调出了监控和聊天记录：免税店签到、学姐微信里"提成 200"。</p><p>你说谎被坐实，<strong>从重处理</strong>。</p>', goNode5);
+    } else if (opt === 'B') {
+      state.riskScore += 1; state.dim.self += 2; state.dim.law += 1;
+      naikeSay('<p>陈警官："配合调查、主动说明，可以从轻。但行为已经构成走私。"</p>', goNode5);
+    } else {
+      state.adventureScore += 2; state.dim.luck += 2; state.dim.self -= 2; state.flags.shift = true;
+      naikeSay('<p>陈警官："你学姐在隔壁房间已经说了。监控显示全程是你自己提着箱子过的机。"</p><p>甩锅没用，还加一条"态度恶劣"。</p>', goNode5);
+    }
+  }
+
+  // ===== 节点⑤：终局微信 =====
+  function goNode5() {
+    show('node5');
+    const msgs = [
+      { from:'su', text:'你还在吗' },
+      { from:'su', text:'警察那边，你就说都是你自己想带的，行吗' },
+      { from:'su', text:'提成我再给你翻一倍，咱俩谁也不能先出事儿' }
+    ];
+    const opts = [
+      { id:'A', text:'「好，我听你的。」' },
+      { id:'B', text:'「学姐，我已经跟警官说了实话，你也自首吧。」' },
+      { id:'C', text:'不回消息，装死。' }
+    ];
+    buildChat(document.getElementById('chatNode5'), msgs, opts, node5Choose);
+  }
+
+  function node5Choose(opt) {
+    if (opt === 'A') { state.adventureScore += 2; state.dim.luck += 2; state.dim.self -= 2; state.dim.resist -= 2; state.flags.help = true; }
+    if (opt === 'B') { state.riskScore += 2; state.helpedPolice = true; state.dim.self += 2; state.dim.law += 1; state.dim.resist += 2; }
+    if (opt === 'C') { state.dim.self -= 1; state.dim.luck += 1; }
+    const n4 = state.node4;
+    let ending;
+    if (n4 === 'A' || n4 === 'C') ending = 'endingA';
+    else if (n4 === 'B') ending = (opt === 'B') ? 'endingB' : 'endingC';
+    else ending = 'endingA';
+    state.ending = ending.replace('ending','');
+    show(ending);
+  }
+
+  // ===== 结果：人格 + 海报 =====
+  function getPersonality() {
+    // 前面是否踩过实打实的坑（帮带违禁/超额/漏掉藏匿物）——犯过错即使最后自首，也不是"正义线人"
+    const bigMistake = state.flags.tookIllegal || state.flags.missedCig || state.flags.missedBox;
+    switch (state.ending) {
+      case 'B': return bigMistake ? 'redemp' : 'hero';
+      case 'D': return 'alert';
+      case 'A': return 'risk';
+      default:  return 'fuzzy';
+    }
+  }
+  const PERSONAS = {
+    alert: { name:'警惕型 · 清醒大学生', slogan:'天上不会掉馅饼，只会掉海关罚单', desc:'你是那种看到"帮带提成"就会先查法条的人。你的平板基金，一分都不该脏。', bg:'#E63946', accent:'#F4B942', text:'#ffffff' },
+    risk: { name:'快钱冒险者', slogan:'200 块的提成，1.1 万的税款', desc:'你不是坏，只是太想快点得到想要的东西。下次心动前，先搜一下"离岛免税套代购"。', bg:'#1F2937', accent:'#E63946', text:'#ffffff' },
+    hero: { name:'正义线人', slogan:'12360，比闺蜜热线更靠谱', desc:'你全程保持清醒，还在最后拉了学姐一把。反走私宣传大使，非你莫属。', bg:'#0F766E', accent:'#F4B942', text:'#ffffff' },
+    redemp: { name:'迷途知返 · 悔改者', slogan:'犯过的错是真的，回头的勇气也是真的', desc:'你中途踩了坑、差点越陷越深，但最后选择说实话、拉学姐上岸。走私不是"帮个忙"，及时止损是你做得最对的事。', bg:'#B45309', accent:'#F4B942', text:'#ffffff' },
+    fuzzy: { name:'糊涂共犯', slogan:'你以为是搭便车，其实是同船共沉', desc:'"我不知道"不能免责。下次遇到这种事，别装死，先打 12360。', bg:'#6B7280', accent:'#F4B942', text:'#ffffff' }
+  };
+  function showResult() { show('result'); drawPoster(); renderRiskReport(); }
+  function drawPoster() {
+    const p = PERSONAS[getPersonality()];
+    const canvas = document.getElementById('posterCanvas');
+    const ctx = canvas.getContext('2d');
+    const W = canvas.width, H = canvas.height;
+    ctx.fillStyle = p.bg; ctx.fillRect(0,0,W,H);
+    ctx.strokeStyle = p.accent; ctx.lineWidth = 3; ctx.globalAlpha = 0.3;
+    ctx.beginPath(); ctx.arc(W/2,420,220,0,Math.PI*2); ctx.stroke(); ctx.globalAlpha = 1;
+    ctx.fillStyle = p.accent; ctx.font = '600 22px "PingFang SC", sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText('反走私人格测试', W/2, 110);
+    const img = new Image();
+    img.onload = () => {
+      ctx.save(); ctx.beginPath(); ctx.arc(W/2,380,160,0,Math.PI*2); ctx.closePath(); ctx.clip();
+      ctx.fillStyle = '#fff'; ctx.fillRect(W/2-160,220,320,320);
+      const ratio = Math.max(320/img.width, 320/img.height);
+      const dw = img.width*ratio, dh = img.height*ratio;
+      ctx.drawImage(img, W/2-dw/2, 380-dh/2, dw, dh); ctx.restore();
+      ctx.fillStyle = p.text; ctx.font = '700 38px "PingFang SC", sans-serif'; ctx.fillText(p.name, W/2, 620);
+      ctx.fillStyle = p.accent; ctx.font = '600 26px "PingFang SC", sans-serif'; ctx.fillText('「'+p.slogan+'」', W/2, 680);
+      ctx.strokeStyle = p.accent; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(120,730); ctx.lineTo(W-120,730); ctx.stroke();
+      ctx.fillStyle = p.text; ctx.font = '400 22px "PingFang SC", sans-serif'; wrapText(ctx, p.desc, W/2, 790, W-160, 36);
+      ctx.font = '400 18px "PingFang SC", sans-serif'; ctx.globalAlpha = 0.85;
+      ctx.fillText('全民反走私，你我齐参与', W/2, H-90);
+      ctx.font = '400 13px "PingFang SC", sans-serif'; ctx.fillText('本作品由 AI 辅助创作', W/2, H-60); ctx.globalAlpha = 1;
+    };
+    img.src = 'assets/naike.jpg';
+  }
+  // ===== 风险评估报告（细分维度 + 踩坑 + 警示） =====
+  const DIMS = [
+    { key:'law',    name:'法律意识',        max:6,  note:'越高，越能识别"套代购=走私"的违法本质' },
+    { key:'self',   name:'自保能力',        max:6,  note:'越高，越懂得配合调查、保全自己' },
+    { key:'resist', name:'同伴压力抵抗',    max:6,  note:'越高，越顶得住"熟人帮带"话术' },
+    { key:'verify', name:'风险识别',        max:4,  note:'越高，越能识破超额、藏匿与违禁品' },
+    { key:'luck',   name:'侥幸心理（危险）', max:10, note:'越高，越爱赌"应该没事"——这是最大的坑' }
+  ];
+  function dimScore(key) {
+    const d = DIMS.find(x => x.key === key);
+    const v = state.dim[key];
+    return Math.max(0, Math.min(10, Math.round((v / d.max) * 10)));
+  }
+  function riskLevel() {
+    switch (state.ending) {
+      case 'A': return { lv:'极高风险', pct:'90%', color:'#991B1B', txt:'已构成走私违法行为，面临行政处罚与刑事风险' };
+      case 'C': return { lv:'中高风险', pct:'65%', color:'#D97706', txt:'已构成走私行为，受到行政处罚、留下处分' };
+      case 'B': return { lv:'低风险',   pct:'25%', color:'#0F766E', txt:'悬崖勒马、主动配合，化险为夷' };
+      default:  return { lv:'几乎无风险', pct:'5%', color:'#16A34A', txt:'果断拒绝，全程远离走私红线' };
+    }
+  }
+  function renderRiskReport() {
+    const host = document.getElementById('riskReport');
+    const rl = riskLevel();
+    // 踩坑清单
+    const pits = [];
+    if (state.flags.help) pits.push(['x', '明知违法仍替学姐隐瞒、扛包——涉嫌共同参与，责任最重']);
+    if (state.flags.lie || state.flags.shift) pits.push(['x', '对海关隐瞒或甩锅——被坐实后从重处罚，态度恶劣另加']);
+    if (state.flags.missedBox) pits.push(['x', '漏掉了那个"小盒子"——若为文物/濒危制品，直接涉刑']);
+    if (state.flags.missedCig) pits.push(['x', '没识破香烟超额——离岛免税限额每人每年400支']);
+    if (state.flags.tookIllegal) pits.push(['x', '收提成帮他人带货——不论数量，目的决定性质']);
+    if (state.dim.luck >= 5) pits.push(['x', '侥幸心理偏高——"应该没事"正是踩线的原因']);
+    if (state.ending === 'B' || state.ending === 'D') pits.push(['ok', '关键时刻守住底线，选择了正确的一边']);
+    if (pits.length === 0) pits.push(['ok', '这次经历里，你的每一步都在规避走私风险']);
+
+    // 针对性警示
+    let warn = '<p>法律面前，"我不知道"不是免责金牌。套代购、帮带提成，本质上就是走私。</p>';
+    if (state.flags.help) warn = '<p>共犯责任：你在学姐的威胁下隐瞒事实、扛下责任，可能被认定为<b>共同参与</b>。逃税累计达 <b>5 万元</b>即刑事立案。</p>';
+    else if (state.flags.lie || state.flags.shift) warn = '<p>如实申报是义务：隐瞒、伪造、对抗检查，海关可<b>依法从重处罚</b>，并纳入个人征信记录。</p>';
+    else if (state.flags.missedBox) warn = '<p>那个"小盒子"如果真是文物、象牙、玳瑁等制品，涉嫌<b>走私珍贵动物制品罪</b>，量刑可达十年以上。</p>';
+    else if (state.flags.missedCig) warn = '<p>香烟离岛免税限额<b>每人每年400支</b>，超额携带即属走私，补税罚款之外还可能留案底。</p>';
+    else if (state.flags.tookIllegal) warn = '<p>收提成帮他人带货，就是<b>套代购</b>。海关不看数量看目的，一旦查实即构成走私行为。</p>';
+
+    // 维度条
+    let dimsHtml = '';
+    DIMS.forEach(d => {
+      const s = dimScore(d.key);
+      const warnColor = (d.key === 'luck') ? '' : '';
+      dimsHtml += `<div class="dim">
+        <div class="dhead"><span class="dname">${d.name}</span><span class="dval">${s}/10</span></div>
+        <div class="track"><div class="fill" data-w="${s}"></div></div>
+        <div class="dnote">${d.note}</div>
+      </div>`;
+    });
+
+    host.innerHTML = `
+      <div class="report-card">
+        <h3>预警等级</h3>
+        <div class="risk-level" style="background:${rl.color}">
+          <div><div class="lv">${rl.lv}</div><div class="txt">${rl.txt}</div></div>
+          <div class="pct">${rl.pct}</div>
+        </div>
+      </div>
+      <div class="report-card">
+        <h3>风险画像</h3>
+        <div class="sub">根据你全程的选择，从 5 个维度拆解</div>
+        ${dimsHtml}
+      </div>
+      <div class="report-card">
+        <h3>关键选择复盘</h3>
+        <ul class="pit-list">${pits.map(p => `<li><span class="${p[0]}">${p[0]==='x'?'✕':'✓'}</span>${p[1]}</li>`).join('')}</ul>
+      </div>
+      <div class="warn-box">
+        <div class="wt">给你的警示</div>
+        ${warn}
+      </div>
+      <div class="advice">
+        <div class="at">如果现实中遇到这种事</div>
+        <p>① 直接拒绝，不抱侥幸；② 若已卷入，主动向海关或 12360 说明，争取从轻；③ 保留聊天记录、转账凭证；④ 发现身边人组织套代购，拨打 <b>12360</b> 举报。</p>
+      </div>`;
+
+    // 动画填充条形
+    requestAnimationFrame(() => {
+      host.querySelectorAll('.dim .fill').forEach(f => {
+        setTimeout(() => { f.style.width = (f.dataset.w * 10) + '%'; }, 80);
+      });
+    });
+  }
+
+  function wrapText(ctx, text, x, y, maxW, lineH) {
+    const chars = text.split(''); let line = ''; let yy = y;
+    for (const c of chars) {
+      const t = line + c;
+      if (ctx.measureText(t).width > maxW) { ctx.fillText(line, x, yy); line = c; yy += lineH; }
+      else line = t;
+    }
+    ctx.fillText(line, x, yy);
+  }
+  function restart() {
+    state.riskScore = 0; state.adventureScore = 0; state.helpedPolice = false;
+    state.node4 = null; state.ending = null;
+    state.dim = { law:0, self:0, resist:0, verify:0, luck:0 };
+    state.flags = { lie:false, shift:false, help:false, missedCig:false, missedBox:false, tookIllegal:false };
+    selectedItems.clear(); pickedObjs.clear();
+    document.querySelectorAll('.item-card').forEach(c => c.classList.remove('selected'));
+    document.querySelectorAll('.xray .obj').forEach(o => o.classList.remove('picked'));
+    document.querySelectorAll('.thought-choices').forEach(c => { c.classList.remove('show'); c.classList.remove('overlay'); });
+    // 回到开场页
+    momentsView.style.transition = 'none'; momentsView.style.opacity = 0; momentsView.classList.remove('show');
+    momentsView.style.pointerEvents = 'none'; momentsView.style.transform = 'none';
+    const intro = document.querySelector('.screen[data-screen="intro"]');
+    intro.style.transition = 'none'; intro.style.opacity = 1; intro.style.pointerEvents = 'auto'; intro.style.transform = 'none';
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    intro.classList.add('active');
+    document.querySelectorAll('#stage .pline[data-pline]').forEach(l => l.classList.remove('on'));
+    state.stage = 'intro';
+    playIntro();
+  }
+
+</script>
+</body>
+</html>
