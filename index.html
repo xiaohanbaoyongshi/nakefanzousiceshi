@@ -110,7 +110,7 @@
   .moments-item .body .hl { color: #C97F2B; font-weight: 700; }
   .moments-item .pics { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
   .moments-item .pics .pic { width: 88px; height: 88px; border-radius: 2px; overflow: hidden; background: #EDE3C8; border: 2px solid #D8C79A; }
-  .moments-item .pics .pic img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .moments-item .pics .pic img { width: 100%; height: 100%; object-fit: cover; display: block; image-rendering: auto; }
   .moments-item .pics .pic.single { width: 132px; height: 132px; }
   .moments-item .foot { display: flex; align-items: center; gap: 10px; margin-top: 8px; }
   .moments-item .tm { font-size: 11px; color: #8B7B5A; }
@@ -192,6 +192,7 @@
   .content .task { font-size: 12.5px; color: #3E7A33; font-weight: 800; margin-bottom: 12px; }
   .content p { font-size: 15px; line-height: 1.7; color: #4A3B2A; margin-bottom: 10px; }
   .scene-img { width: calc(100% - 28px); height: 34%; object-fit: cover; flex: 0 0 auto; margin: 12px 14px 4px; border-radius: 4px; border: 4px solid #6B4A2B; box-shadow: 5px 5px 0 rgba(74,59,42,0.3); image-rendering: pixelated; }
+  .scene-img[data-no-px] { image-rendering: auto; }
   .screen[data-screen="node2"] .scene-img { height: 26%; }
   .monologue { background: #FFF3C9; border: 3px solid #6B4A2B; border-radius: 4px; padding: 12px 14px; font-size: 14px; color: #6B4A2B; margin: 10px 0; box-shadow: 3px 3px 0 rgba(74,59,42,0.3); font-weight: 700; }
 
@@ -419,7 +420,7 @@
 
     <!-- 节点②：免税店点选 -->
     <div class="screen" data-screen="node2">
-      <img class="scene-img" src="assets/scene-dutyfree.jpg" alt="海南免税城">
+      <img class="scene-img" data-no-px src="assets/scene-dutyfree.jpg" alt="海南免税城">
       <div class="content">
         <h2>海口国际免税城</h2>
         <div class="task">你要做什么：帮学姐拿清单上的东西</div>
@@ -591,7 +592,7 @@
 <script>
   // ===== 星露谷像素化：图片运行时降采样成像素风 =====
   function pixelateImg(img, targetW) {
-    if (img.dataset.pxDone) return;
+    if (img.dataset.pxDone || img.dataset.noPx !== undefined) return;
     img.dataset.pxDone = '1';
     try {
       const c = document.createElement('canvas');
@@ -606,9 +607,6 @@
   function pxAll() {
     document.querySelectorAll('.scene-img, .ending-img').forEach(im => {
       if (im.complete) pixelateImg(im, 150); else im.addEventListener('load', () => pixelateImg(im, 150), { once: true });
-    });
-    document.querySelectorAll('.moments-item .pic img').forEach(im => {
-      if (im.complete) pixelateImg(im, 56); else im.addEventListener('load', () => pixelateImg(im, 56), { once: true });
     });
     document.querySelectorAll('.naike-head img').forEach(im => {
       if (im.complete) pixelateImg(im, 64); else im.addEventListener('load', () => pixelateImg(im, 64), { once: true });
@@ -1059,8 +1057,8 @@
     document.querySelectorAll('.xray .obj').forEach(o => o.classList.remove('picked'));
     document.querySelectorAll('.thought-choices').forEach(c => { c.classList.remove('show'); c.classList.remove('overlay'); });
     // 回到开场页
-    momentsView.style.transition = 'none'; momentsView.style.opacity = 0; momentsView.classList.remove('show');
-    momentsView.style.pointerEvents = 'none'; momentsView.style.transform = 'none';
+    momentsView.style.transition = ''; momentsView.style.opacity = ''; momentsView.classList.remove('show');
+    momentsView.style.pointerEvents = ''; momentsView.style.transform = '';
     const intro = document.querySelector('.screen[data-screen="intro"]');
     intro.style.transition = 'none'; intro.style.opacity = 1; intro.style.pointerEvents = 'auto'; intro.style.transform = 'none';
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
